@@ -14,8 +14,8 @@ static void usage(char** argv) {
   cout << "\touputfile - optional output html filename\n";
 }
 
-static string surroundWithTag (string text, string tag, string attributes=""){
-  return "<"+tag+" "+attributes+">"+text+"</"+tag+">";
+static string surroundWithTag (string text, string tag, string attributes="") {
+  return "<"+tag+attributes+">"+text+"</"+tag+">";
 }
 
 static string replaceMatch (smatch match, string text, string htmlText) {
@@ -25,7 +25,8 @@ static string replaceMatch (smatch match, string text, string htmlText) {
   newText.replace(start, end, htmlText);
   return newText;
 }
-static string handleHeader (smatch match){
+
+static string handleHeader (smatch match) {
   string size = "h"+to_string(match[1].length());
   string header = match[2];
 
@@ -42,9 +43,20 @@ static string handleStrong (smatch match) {
   return surroundWithTag(bold, "strong");
 }
 
-static string cleanText (string text){
+static string handleLink (smatch match) {
+  string linkText(match[1]);
+  string url(match[2]);
+  string attr = " href=\"" + url + "\"";
+  return surroundWithTag(linkText, "a", attr);
+}
+
+static string handleInlineCode (smatch match) {
+  return surroundWithTag(match[1], "code");
+}
+
+static string cleanText (string text) {
   map<string, string> replacements;
-  replacements.emplace("<", "&lt;");
+ replacements.emplace("<", "&lt;");
   replacements.emplace(">", "&gt;");
   string newText = text;
   for (map<string,string>::iterator i = replacements.begin(),
@@ -58,12 +70,15 @@ static string cleanText (string text){
 
   return newText;
 }
-static string parseMarkdown (string text){
+
+static string parseMarkdown (string text) {
   smatch match;
   RuleMap rules;
   rules.emplace("(#+) (.*)", &handleHeader);
+  rules.emplace("\\[([^\\]]+)\\]\\(([^\\)]+)\\)", &handleLink);
   rules.emplace("\\n\\* (.*)", &handleUnorderedList);
   rules.emplace("\\*\\*(.*)\\*\\*", &handleStrong);
+  rules.emplace("`(.*)`", &handleInlineCode);
 
   string updatedText = cleanText(text);
   for(RuleMap::iterator i = rules.begin(), e = rules.end();
@@ -72,7 +87,7 @@ static string parseMarkdown (string text){
     while(regex_search(text, match, regex(i->first))){
       string html = i->second(match);
       updatedText = replaceMatch(match, updatedText, html);
-      text = match.suffix().str(); 
+      text = match.suffix().str();
     }
   }
 
@@ -94,10 +109,10 @@ int main (int argc, char** argv) {
   stringstream buffer;
   string plaintext;
   string htmlText;
-  if(argc < 2){
+  if (argc < 2) {
     usage(argv);
     return 1;
-  } else if (argc == 3){
+  } else if (argc == 3) {
     output.open(argv[2]);
   }
 
@@ -110,9 +125,11 @@ int main (int argc, char** argv) {
   plaintext = buffer.str();
   htmlText = parseMarkdown(plaintext);
 
-  if(output.is_open()){
+  if (output.is_open()) {
     output << htmlText << endl;
   }
+
+
   cout << htmlText << endl;
 
   return 0;
