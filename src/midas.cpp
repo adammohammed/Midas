@@ -61,9 +61,9 @@ static string cleanText (string text) {
   string newText = text;
   for (map<string,string>::iterator i = replacements.begin(),
          e = replacements.end(); i != e; ++i){
-    int start;
+    size_t start;
     int length = i->first.length();
-    while((start = newText.find(i->first)) != -1) {
+    while((start = newText.find(i->first)) != string::npos) {
       newText.replace(start, length, i->second);
     }
   }
@@ -91,7 +91,7 @@ static string parseMarkdown (string text) {
     }
   }
 
-  while(updatedText.find("</ul>\n<ul>") != -1){
+  while(updatedText.find("</ul>\n<ul>") != string::npos){
     string unwanted = "</ul>\n<ul>";
     int start = updatedText.find(unwanted);
     int end = unwanted.length();

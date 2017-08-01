@@ -1,14 +1,19 @@
 CC=g++
+CPPFLAGS=-std=c++11 -Wall -Wpedantic -Wextra
+MKDIR_P=mkdir -p
 
-all: bin/midas
+all: directories bin/midas
 
 bin/midas: obj/midas.o
-	$(CC) $^ -o $@
+	$(CC) $(CPPFLAGS) $^ -o $@
 
 obj/%.o : src/%.cpp
-	$(CC) $< -c -o $@
+	$(CC) $(CPPFLAGS) $< -c -o $@
 
-.PHONY: clean
+.PHONY: clean directories
+
+directories:
+	${MKDIR_P} bin obj
 
 clean:
 	$(RM) midas bin/midas
