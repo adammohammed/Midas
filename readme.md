@@ -7,9 +7,11 @@ to learn some parsing grammar concepts.
 * Headings 1-6
 * Strong
 * Unordered Lists
+* Ordered Lists
+* Emphasis
 * Encoding html values (e.g ">" to "&gt;")
 
 ## Features on Deck
 * Images
-* Links
+* Nested Lists
 * Styling (?)
