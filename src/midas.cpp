@@ -38,8 +38,13 @@ static string handleUnorderedList(smatch match) {
   return "\n" + surroundWithTag(surroundWithTag(listItem, "li"), "ul");
 }
 
+static string handleOrderedList(smatch match) {
+  string listItem = match[1];
+  return "\n" + surroundWithTag(surroundWithTag(listItem, "li"), "ol");
+}
+
 static string handleStrong(smatch match) {
-  string bold = match[1];
+  string bold = match[2];
   return surroundWithTag(bold, "strong");
 }
 
@@ -56,6 +61,10 @@ static string handleInlineCode(smatch match) {
 
 static string handleStrikethrough(smatch match) {
   return surroundWithTag(match[1], "strike");
+}
+
+static string handleEmphasis(smatch match) {
+  return surroundWithTag(match[2], "em");
 }
 
 static string cleanText(string text) {
@@ -79,14 +88,16 @@ static string cleanText(string text) {
 static string parseMarkdown(string text) {
   smatch match;
   RuleMap rules;
-  rules.emplace("(#+) (.*)", &handleHeader);
+  rules.emplace("\n(#+) (.*)", &handleHeader);
   rules.emplace("\\[([^\\]]+)\\]\\(([^\\)]+)\\)", &handleLink);
   rules.emplace("\\n\\* (.*)", &handleUnorderedList);
-  rules.emplace("\\*\\*(.*)\\*\\*", &handleStrong);
+  rules.emplace("(\\*|_){1}(.*)\\1", &handleEmphasis);
+  rules.emplace("(\\*\\*|__)(.*)\\1", &handleStrong);
   rules.emplace("`(.*)`", &handleInlineCode);
   rules.emplace("~{2}(.*)~{2}", &handleStrikethrough);
+  rules.emplace("\\n[0-9]+\\.(.*)", &handleOrderedList);
 
-  string updatedText = cleanText(text);
+  string updatedText = "\n" + cleanText(text);
   for (RuleMap::iterator i = rules.begin(), e = rules.end(); i != e; ++i) {
     text = updatedText;
     while (regex_search(text, match, regex(i->first))) {
@@ -98,6 +109,14 @@ static string parseMarkdown(string text) {
 
   while (updatedText.find("</ul>\n<ul>") != string::npos) {
     string unwanted = "</ul>\n<ul>";
+    int start = updatedText.find(unwanted);
+    int end = unwanted.length();
+
+    updatedText.replace(start, end, "\n");
+  }
+
+  while (updatedText.find("</ol>\n<ol>") != string::npos) {
+    string unwanted = "</ol>\n<ol>";
     int start = updatedText.find(unwanted);
     int end = unwanted.length();
 
