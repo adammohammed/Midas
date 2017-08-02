@@ -15,3 +15,6 @@ Things can be *emphasized* in _multiple_ ways.
 0. Things
 1. Are
 3. Important
+
+
+![Stuff](testimg.jpg)

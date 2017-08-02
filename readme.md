@@ -10,8 +10,8 @@ to learn some parsing grammar concepts.
 * Ordered Lists
 * Emphasis
 * Encoding html values (e.g ">" to "&gt;")
+* Images
 
 ## Features on Deck
-* Images
 * Nested Lists
 * Styling (?)

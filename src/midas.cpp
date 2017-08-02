@@ -67,6 +67,11 @@ static string handleEmphasis(smatch match) {
   return surroundWithTag(match[2], "em");
 }
 
+static string handleImage(smatch match) {
+  string tag = "<img src=" + string(match[2]) + "/>";
+  return tag;
+}
+
 static string cleanText(string text) {
   map<string, string> replacements;
   replacements.emplace("<", "&lt;");
@@ -96,6 +101,7 @@ static string parseMarkdown(string text) {
   rules.emplace("`(.*)`", &handleInlineCode);
   rules.emplace("~{2}(.*)~{2}", &handleStrikethrough);
   rules.emplace("\\n[0-9]+\\.(.*)", &handleOrderedList);
+  rules.emplace("\n!\\[([^\\]]+)\\]\\(([^\\)]+)\\)", &handleImage);
 
   string updatedText = "\n" + cleanText(text);
   for (RuleMap::iterator i = rules.begin(), e = rules.end(); i != e; ++i) {
