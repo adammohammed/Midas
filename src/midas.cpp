@@ -54,6 +54,10 @@ static string handleInlineCode(smatch match) {
   return surroundWithTag(match[1], "code");
 }
 
+static string handleStrikethrough(smatch match) {
+  return surroundWithTag(match[1], "strike");
+}
+
 static string cleanText(string text) {
   map<string, string> replacements;
   replacements.emplace("<", "&lt;");
@@ -80,6 +84,7 @@ static string parseMarkdown(string text) {
   rules.emplace("\\n\\* (.*)", &handleUnorderedList);
   rules.emplace("\\*\\*(.*)\\*\\*", &handleStrong);
   rules.emplace("`(.*)`", &handleInlineCode);
+  rules.emplace("~{2}(.*)~{2}", &handleStrikethrough);
 
   string updatedText = cleanText(text);
   for (RuleMap::iterator i = rules.begin(), e = rules.end(); i != e; ++i) {
