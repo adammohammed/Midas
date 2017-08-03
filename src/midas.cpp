@@ -30,7 +30,7 @@ static string handleHeader(smatch match) {
   string size = "h" + to_string(match[1].length());
   string header = match[2];
 
-  return surroundWithTag(header, size);
+  return "\n" + surroundWithTag(header, size);
 }
 
 static string handleUnorderedList(smatch match) {
@@ -68,7 +68,7 @@ static string handleEmphasis(smatch match) {
 }
 
 static string handleImage(smatch match) {
-  string tag = "<img src=" + string(match[2]) + "/>";
+  string tag = "<img alt=\""+ string(match[1]) + "\" src=\"" + string(match[2]) + "\" />";
   return tag;
 }
 
@@ -93,14 +93,14 @@ static string cleanText(string text) {
 static string parseMarkdown(string text) {
   smatch match;
   RuleMap rules;
-  rules.emplace("\n(#+) (.*)", &handleHeader);
+  rules.emplace("\\n(#+) (.*)", &handleHeader);
   rules.emplace("\\[([^\\]]+)\\]\\(([^\\)]+)\\)", &handleLink);
   rules.emplace("\\n\\* (.*)", &handleUnorderedList);
   rules.emplace("(\\*|_){1}(.*)\\1", &handleEmphasis);
   rules.emplace("(\\*\\*|__)(.*)\\1", &handleStrong);
   rules.emplace("`(.*)`", &handleInlineCode);
   rules.emplace("~{2}(.*)~{2}", &handleStrikethrough);
-  rules.emplace("\\n[0-9]+\\.(.*)", &handleOrderedList);
+  rules.emplace("\\n[0-9]+\\. (.*)", &handleOrderedList);
   rules.emplace("\n!\\[([^\\]]+)\\]\\(([^\\)]+)\\)", &handleImage);
 
   string updatedText = "\n" + cleanText(text);
