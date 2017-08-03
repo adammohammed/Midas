@@ -1,3 +1,8 @@
+/*
+ * Midas - Adam Mohammed
+ * A markdown to html generator
+ */
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
